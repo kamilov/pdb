@@ -1,0 +1,32 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * @param string $path
+ * @return mixed|null
+ */
+function requireIfExists(string $path) {
+    return is_file($path) ? require $path : null;
+}
+
+$loader = requireIfExists(__DIR__ . '/../vendor/autoload.php');
+
+if ($loader === null) {
+    fwrite(STDERR, implode(PHP_EOL, [
+        'You must set up the project dependencies, run the following commands:',
+        'curl -s http://getcomposer.org/installer | php',
+        'php composer.phar install',
+        ''
+    ]));
+
+    exit(1);
+}
+
+$application = new \Symfony\Component\Console\Application('PDB');
+
+$application->add(new \Kamilov\PDB\Console\Command\ServerCommand());
+$application->add(new \Kamilov\PDB\Console\Command\ClientCommand());
+
+$exitCode = $application->run();
+
+exit($exitCode);
